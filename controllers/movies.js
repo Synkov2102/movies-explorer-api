@@ -68,5 +68,5 @@ module.exports.deleteMovieById = (req, res, next) => {
 module.exports.findMovies = (req, res, next) => {
   Movie.find({})
     .then((movie) => res.send({ movie }))
-    .catch((err) => next(err));
+    .catch(next);
 };

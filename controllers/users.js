@@ -29,8 +29,9 @@ module.exports.createUser = (req, res, next) => {
       },
     }))
     .catch((err) => {
-      if (err.code === 11000) { next(sameEmailErr); }
-      next(err);
+      if (err.code === 11000) {
+        next(sameEmailErr);
+      } else { next(err); }
     });
 };
 
@@ -40,18 +41,13 @@ module.exports.findCurrentUser = (req, res, next) => {
       if (!user) { throw notFoundErr; }
       return res.send({ user });
     })
-    .catch((err) => {
-      if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        next(incorrectDataErr);
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 module.exports.patchUser = (req, res, next) => {
-  const { name } = req.body;
+  const { name, email } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) { throw notFoundErr; }
       return res.send({ user });
@@ -59,8 +55,7 @@ module.exports.patchUser = (req, res, next) => {
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
         next(incorrectDataErr);
-      }
-      next(err);
+      } else { next(err); }
     });
 };
 
@@ -89,7 +84,6 @@ module.exports.login = (req, res, next) => {
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
         next(incorrectDataErr);
-      }
-      next(err);
+      } else { next(err); }
     });
 };

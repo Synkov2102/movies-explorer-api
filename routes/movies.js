@@ -29,7 +29,7 @@ movies.post('/movies', celebrate({
     image: Joi.custom(validateURL).required(),
     trailerLink: Joi.custom(validateURL).required(),
     thumbnail: Joi.custom(validateURL).required(),
-    movieId: Joi.string().required(),
+    movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),
