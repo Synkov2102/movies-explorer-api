@@ -1,9 +1,6 @@
 const user = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
-const URLErr = new Error('Неправильный формат ссылки');
-URLErr.statusCode = 400;
-
 const {
   findCurrentUser,
   patchUser,

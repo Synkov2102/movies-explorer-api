@@ -3,12 +3,11 @@ const movies = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
 
-const URLErr = new Error('Неправильный формат ссылки');
-URLErr.statusCode = 400;
+const ErrorValidation = require('../errors/ErrorValidation');
 
 const validateURL = (value) => {
   if (!validator.isURL(value, { require_protocol: true })) {
-    throw URLErr;
+    throw new ErrorValidation('Неправильный формат ссылки');
   }
   return value;
 };

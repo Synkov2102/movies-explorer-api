@@ -6,12 +6,9 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
-const URLErr = new Error('Неправильный формат ссылки');
-URLErr.statusCode = 400;
+const ErrorNotFound = require('./errors/ErrorNotFound');
 
-const { PORT = 3000 } = process.env;
-const pageNotFound = new Error('Страница не найдена');
-pageNotFound.statusCode = 404;
+const { PORT = 3000, NODE_ENV, DB_URL } = process.env;
 
 const user = require('./routes/users');
 const movie = require('./routes/movies');
@@ -19,7 +16,7 @@ const authorization = require('./routes/authorization');
 const auth = require('./middlewares/auth');
 
 // подключаемся к серверу mongo
-mongoose.connect('mongodb://127.0.0.1:27017/moviedb');
+mongoose.connect(NODE_ENV === 'production' ? DB_URL : 'mongodb://127.0.0.1:27017/moviedb');
 
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const allowedCors = [
@@ -63,7 +60,7 @@ app.use(auth);
 app.use('/', user);
 app.use('/', movie);
 app.use('/', (req, res, next) => {
-  next(pageNotFound);
+  next(() => { throw new ErrorNotFound('Страница не найдена'); });
 });
 app.use(errorLogger);
 app.use(errors());

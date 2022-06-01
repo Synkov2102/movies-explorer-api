@@ -3,17 +3,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 
-const userErr = new Error('Неправильная почта или пароль');
-userErr.statusCode = 401;
-
-const incorrectDataErr = new Error('Переданы некорректные данные');
-incorrectDataErr.statusCode = 400;
-
-const notFoundErr = new Error('Пользователь не найден');
-notFoundErr.statusCode = 404;
-
-const sameEmailErr = new Error('Пользователь c такой почтой уже зарегистрирован');
-sameEmailErr.statusCode = 409;
+const ErrorUnauthorized = require('../errors/ErrorUnauthorized');
+const ErrorValidation = require('../errors/ErrorValidation');
+const ErrorNotFound = require('../errors/ErrorNotFound');
+const ErrorConflict = require('../errors/ErrorConflict');
 
 module.exports.createUser = (req, res, next) => {
   const {
@@ -30,15 +23,16 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(sameEmailErr);
-      } else { next(err); }
+        throw new ErrorConflict('Пользователь c такой почтой уже зарегистрирован');
+      }
+      next(err);
     });
 };
 
 module.exports.findCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if (!user) { throw notFoundErr; }
+      if (!user) { throw new ErrorNotFound('Пользователь не найден'); }
       return res.send({ user });
     })
     .catch(next);
@@ -49,13 +43,14 @@ module.exports.patchUser = (req, res, next) => {
 
   User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
     .then((user) => {
-      if (!user) { throw notFoundErr; }
+      if (!user) { throw new ErrorNotFound('Пользователь не найден'); }
       return res.send({ user });
     })
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        next(incorrectDataErr);
-      } else { next(err); }
+        throw new ErrorValidation('Переданы некорректные данные');
+      }
+      next(err);
     });
 };
 
@@ -65,7 +60,7 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw userErr;
+        throw new ErrorUnauthorized('Неправильная почта или пароль');
       }
       token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', { expiresIn: '7d' });
       return bcrypt.compare(password, user.password);
@@ -73,7 +68,7 @@ module.exports.login = (req, res, next) => {
     .then((matched) => {
       if (!matched) {
         // хеши не совпали — отклоняем промис
-        throw userErr;
+        throw new ErrorUnauthorized('Неправильная почта или пароль');
       }
 
       // аутентификация успешна
@@ -83,7 +78,8 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        next(incorrectDataErr);
-      } else { next(err); }
+        throw new ErrorValidation('Переданы некорректные данные');
+      }
+      next(err);
     });
 };
