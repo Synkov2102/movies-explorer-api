@@ -22,6 +22,7 @@ mongoose.connect(NODE_ENV === 'production' ? DB_URL : 'mongodb://127.0.0.1:27017
 const allowedCors = [
   'https://praktikum.tk',
   'http://praktikum.tk',
+  'http://localhost:3000',
 ];
 
 // подключаем мидлвары, роуты и всё остальное...
