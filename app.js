@@ -23,6 +23,8 @@ const allowedCors = [
   'https://praktikum.tk',
   'http://praktikum.tk',
   'http://localhost:3000',
+  'http://synkov.students.nomoredomains.sbs',
+  'https://synkov.students.nomoredomains.sbs',
 ];
 
 // подключаем мидлвары, роуты и всё остальное...
