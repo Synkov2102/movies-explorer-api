@@ -23,9 +23,10 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        throw new ErrorConflict('Пользователь c такой почтой уже зарегистрирован');
+        next(new ErrorConflict('Пользователь c такой почтой уже зарегистрирован'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
